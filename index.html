@@ -22,6 +22,22 @@
       box-sizing: border-box;
     }
 
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: -60px;
+      z-index: 2000;
+      padding: 10px 14px;
+      border-radius: 6px;
+      color: #fff;
+      background: #172434;
+      font-weight: 800;
+    }
+
+    .skip-link:focus {
+      top: 12px;
+    }
+
     .sr-only {
       position: absolute;
       width: 1px;
@@ -142,6 +158,24 @@
       padding: 7px 9px;
       color: var(--royal-blue);
       background: #fff;
+      cursor: pointer;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .utility-button {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 7px 9px;
+      color: var(--royal-blue);
+      background: #fff;
+      font-size: 12px;
+      font-weight: 800;
       cursor: pointer;
     }
 
@@ -608,9 +642,51 @@
         height: 210px;
       }
     }
+
+    @media print {
+      .topbar {
+        position: static;
+      }
+
+      .input-panel,
+      .floating-panda,
+      .reset-button,
+      .utility-button,
+      .skip-link {
+        display: none !important;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .app-shell {
+        max-width: none;
+        display: block;
+        padding: 0;
+      }
+
+      .results-column {
+        display: block;
+      }
+
+      .summary-grid,
+      .check-grid,
+      .plot-grid {
+        break-inside: avoid;
+      }
+
+      .panel,
+      .metric-card,
+      .diagram-card,
+      .check-card {
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-results">Skip to beam results</a>
   <header class="topbar">
     <div class="brand" aria-label="Beam Designer, BYU Cougars">
       <div class="cougar-mark" aria-hidden="true">BYU</div>
@@ -621,6 +697,8 @@
     </div>
     <div class="example-badge">Example beam loaded</div>
   </header>
+
+  <div id="calculation-status" class="sr-only" role="status" aria-live="polite"></div>
 
   <div class="floating-panda" aria-hidden="true">
     <svg viewBox="0 0 140 140" role="presentation">
@@ -652,7 +730,9 @@
     <aside class="panel input-panel" aria-labelledby="inputs-title">
       <div class="panel-heading">
         <h2 id="inputs-title">Beam Inputs</h2>
-        <button class="reset-button" id="reset-button" type="button">Reset</button>
+        <div class="panel-actions">
+          <button class="reset-button" id="reset-button" type="button">Reset</button>
+        </div>
       </div>
 
       <div class="input-content">
@@ -777,9 +857,9 @@
       </div>
     </aside>
 
-    <section class="results-column" aria-label="Beam analysis results">
+    <section class="results-column" id="main-results" aria-label="Beam analysis results" tabindex="-1">
       <div class="summary-grid" aria-label="Result summary">
-        <div class="validation-banner" role="alert">Results unavailable: correct the highlighted input values.</div>
+        <div class="validation-banner" role="alert" aria-live="polite">Results unavailable: correct the highlighted input values.</div>
         <article class="metric-card">
           <div class="label">Maximum moment</div>
           <div class="value">50.0 kip-ft</div>
@@ -805,7 +885,10 @@
       <div class="panel plot-panel">
         <div class="panel-heading">
           <h2>Beam and Diagrams</h2>
-          <span class="example-badge" style="color:#64748b;border-color:#d8e2ec">Placeholder output</span>
+          <div class="panel-actions">
+            <button class="utility-button" id="export-button" type="button">Export results</button>
+            <button class="utility-button" id="print-button" type="button">Print</button>
+          </div>
         </div>
         <div class="plot-grid">
           <article class="diagram-card beam-card full">
@@ -1486,8 +1569,6 @@
       drawShear(result);
       drawMoment(result);
       drawDeflection(result, checks);
-      document.querySelector(".plot-panel .panel-heading .example-badge").textContent =
-        "Calculated analysis";
       document.querySelector(".footer-note").textContent =
         "Reaction, shear, moment, deflection, and strength values are calculated.";
 
@@ -1499,36 +1580,50 @@
         : checks.member.Fb;
       const bendingStatus = checks.bendingPass ? "PASS" : "FAIL";
       document.getElementById("bending-check-line").innerHTML =
-        `<strong>${bendingStatus}</strong> · ${formatStat(bendingDisplay, stressUnit, 3)} ≤ ` +
+        `<strong>${checks.bendingPass ? "✓ PASS" : "× FAIL"}</strong> · ${formatStat(bendingDisplay, stressUnit, 3)} ≤ ` +
         `${formatStat(bendingAllowDisplay, stressUnit, 3)}`;
       document.getElementById("bending-property-line").textContent =
         `${activeUnit === "metric" ? "Sₓ = " + formatStat(checks.member.S * 16387.064, "mm³", 3) : "Sₓ = " + formatStat(checks.member.S, "in³", 3)} · ` +
         `Utilization = ${(checks.bendingUtilization * 100).toFixed(1)}%`;
       const bendingBadge = document.getElementById("bending-check-badge");
-      bendingBadge.textContent = bendingStatus;
+      bendingBadge.textContent = checks.bendingPass ? "✓ PASS" : "× FAIL";
       bendingBadge.style.color = checks.bendingPass ? "#18794e" : "#a33a3a";
       bendingBadge.style.background = checks.bendingPass ? "#e7f6ef" : "#fdeaea";
+      bendingBadge.setAttribute("aria-label", `Bending check ${bendingStatus}`);
+      document.getElementById("bending-check-card").setAttribute(
+        "aria-label",
+        `Bending check ${bendingStatus}: ${formatStat(bendingDisplay, stressUnit, 3)} of ${formatStat(bendingAllowDisplay, stressUnit, 3)}`
+      );
 
       const displayedAllow = activeUnit === "metric"
         ? checks.deflectionAllowIn * 25.4
         : checks.deflectionAllowIn;
       const deflectionStatus = checks.deflectionPass ? "PASS" : "FAIL";
       document.getElementById("deflection-check-line").innerHTML =
-        `<strong>${deflectionStatus}</strong> · ${formatStat(displayedDeflection, deflectionUnit, 3)} ≤ ` +
+        `<strong>${checks.deflectionPass ? "✓ PASS" : "× FAIL"}</strong> · ${formatStat(displayedDeflection, deflectionUnit, 3)} ≤ ` +
         `${formatStat(displayedAllow, deflectionUnit, 3)}`;
       document.getElementById("deflection-utilization-line").textContent =
         `Utilization = ${(checks.deflectionUtilization * 100).toFixed(1)}%`;
       const deflectionBadge = document.getElementById("deflection-check-badge");
-      deflectionBadge.textContent = deflectionStatus;
+      deflectionBadge.textContent = checks.deflectionPass ? "✓ PASS" : "× FAIL";
       deflectionBadge.style.color = checks.deflectionPass ? "#18794e" : "#a33a3a";
       deflectionBadge.style.background = checks.deflectionPass ? "#e7f6ef" : "#fdeaea";
+      deflectionBadge.setAttribute("aria-label", `Deflection check ${deflectionStatus}`);
+      document.getElementById("deflection-check-card").setAttribute(
+        "aria-label",
+        `Deflection check ${deflectionStatus}: ${formatStat(displayedDeflection, deflectionUnit, 3)} of ${formatStat(displayedAllow, deflectionUnit, 3)}`
+      );
 
       const overallPass = checks.bendingPass && checks.deflectionPass;
       summaryCards[3].classList.toggle("status-pass", overallPass);
       summaryCards[3].classList.toggle("status-fail", !overallPass);
-      summaryCards[3].querySelector(".value").textContent = overallPass ? "PASS" : "FAIL";
+      summaryCards[3].querySelector(".value").textContent = overallPass ? "✓ PASS" : "× FAIL";
       summaryCards[3].querySelector(".detail").textContent =
         overallPass ? "Both checks pass" : "One or more checks fail";
+
+      document.getElementById("calculation-status").textContent =
+        `Analysis updated. Overall result ${overallPass ? "PASS" : "FAIL"}. ` +
+        `Bending ${bendingStatus}. Deflection ${deflectionStatus}.`;
     }
 
     function validateInputs() {
@@ -1767,6 +1862,63 @@
           validateInputs();
         }
       });
+    });
+
+    document.getElementById("print-button").addEventListener("click", () => {
+      window.print();
+    });
+
+    document.getElementById("export-button").addEventListener("click", () => {
+      if (resultsColumn.classList.contains("results-invalid")) return;
+
+      const result = calculateStatics();
+      const checks = calculateDeflectionAndChecks(result);
+      const payload = {
+        support: result.isCantilever ? "Cantilever" : "Simply supported",
+        unitSystem: activeUnit,
+        span: displayLength(result.span),
+        reactions: result.isCantilever
+          ? {
+              verticalReaction: displayForce(result.reactions.left),
+              fixedEndMoment: displayMoment(result.reactions.moment)
+            }
+          : {
+              leftReaction: displayForce(result.reactions.left),
+              rightReaction: displayForce(result.reactions.right)
+            },
+        maximumShear: displayForce(Math.abs(result.maxShear.value)),
+        maximumShearLocation: displayLength(result.maxShear.x),
+        maximumMoment: displayMoment(Math.abs(result.maxMoment.value)),
+        maximumMomentLocation: displayLength(result.maxMoment.x),
+        maximumDeflection: activeUnit === "metric"
+          ? Math.abs(checks.maxDeflection.value) * 25.4
+          : Math.abs(checks.maxDeflection.value),
+        maximumDeflectionLocation: displayLength(checks.maxDeflection.x),
+        bendingStress: activeUnit === "metric"
+          ? checks.bendingStressKsi * 6.894757
+          : checks.bendingStressKsi,
+        bendingAllowable: activeUnit === "metric"
+          ? checks.member.Fb * 6.894757
+          : checks.member.Fb,
+        deflectionAllowable: activeUnit === "metric"
+          ? checks.deflectionAllowIn * 25.4
+          : checks.deflectionAllowIn,
+        bendingPass: checks.bendingPass,
+        deflectionPass: checks.deflectionPass,
+        overallPass: checks.bendingPass && checks.deflectionPass
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "beam-designer-results.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     });
 
     document.getElementById("reset-button").addEventListener("click", () => {
