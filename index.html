@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Beam Designer</title>
+  <style>
+    :root {
+      --royal-blue: #002e5d;
+      --bright-blue: #0062b8;
+      --sky: #eaf3fb;
+      --ink: #172434;
+      --muted: #64748b;
+      --line: #d8e2ec;
+      --paper: #ffffff;
+      --fail: #a33a3a;
+      --pass: #18794e;
+      --shadow: 0 10px 28px rgba(16, 54, 92, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: #f5f8fc;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      color: #fff;
+      background: var(--royal-blue);
+      border-bottom: 4px solid #62a8db;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cougar-mark {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .brand-text span {
+      display: block;
+      margin-top: 5px;
+      font-size: 12px;
+      color: #d8eaf8;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .example-badge {
+      padding: 7px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .app-shell {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 330px minmax(0, 1fr);
+      gap: 22px;
+    }
+
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .input-panel {
+      height: fit-content;
+      overflow: hidden;
+    }
+
+    .panel-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 56px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-heading h2,
+    .panel-heading h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .reset-button {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 7px 9px;
+      color: var(--royal-blue);
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .input-content {
+      padding: 14px 16px 18px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label,
+    .field legend,
+    .group-title {
+      display: block;
+      margin-bottom: 6px;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 38px;
+      border: 1px solid #bcc9d7;
+      border-radius: 7px;
+      padding: 7px 9px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .field input:focus,
+    .field select:focus,
+    button:focus {
+      outline: 3px solid rgba(0, 98, 184, 0.20);
+      outline-offset: 1px;
+      border-color: var(--bright-blue);
+    }
+
+    .unit-toggle,
+    .support-toggle,
+    .origin-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7f9fc;
+    }
+
+    .unit-toggle label,
+    .support-toggle label,
+    .origin-toggle label {
+      margin: 0;
+      padding: 7px 8px;
+      border-radius: 6px;
+      text-align: center;
+      color: #64748b;
+      cursor: pointer;
+    }
+
+    .unit-toggle input,
+    .support-toggle input,
+    .origin-toggle input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .unit-toggle input:checked + label,
+    .support-toggle input:checked + label,
+    .origin-toggle input:checked + label {
+      color: #fff;
+      background: var(--royal-blue);
+    }
+
+    .section-divider {
+      margin: 18px -16px 14px;
+      padding: 9px 16px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: var(--royal-blue);
+      background: #f7fafd;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .load-card {
+      position: relative;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfdff;
+    }
+
+    .load-card .load-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .load-card .load-grid.three {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    .load-card .field {
+      margin: 0;
+    }
+
+    .load-card input {
+      height: 34px;
+      padding: 6px;
+    }
+
+    .load-card .remove {
+      position: absolute;
+      right: 7px;
+      top: 7px;
+      width: 24px;
+      height: 24px;
+      border: 0;
+      border-radius: 50%;
+      color: #7f1d1d;
+      background: #fee2e2;
+      cursor: pointer;
+    }
+
+    .load-card .load-title {
+      padding-right: 28px;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .load-card .origin-toggle {
+      grid-template-columns: 1fr 1fr;
+      margin-top: 8px;
+    }
+
+    .add-button {
+      width: 100%;
+      min-height: 36px;
+      border: 1px dashed #91a7bb;
+      border-radius: 8px;
+      color: var(--royal-blue);
+      background: #fff;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .results-column {
+      min-width: 0;
+      display: grid;
+      gap: 22px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .metric-card {
+      min-height: 112px;
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: 0 5px 18px rgba(16, 54, 92, 0.06);
+    }
+
+    .metric-card .label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .metric-card .value {
+      margin-top: 8px;
+      color: var(--royal-blue);
+      font-size: 22px;
+      font-weight: 850;
+    }
+
+    .metric-card .detail {
+      margin-top: 5px;
+      color: #536579;
+      font-size: 12px;
+    }
+
+    .status-pass {
+      color: var(--pass);
+    }
+
+    .status-pass .value,
+    .status-pass .detail {
+      color: var(--pass);
+    }
+
+    .plot-panel {
+      overflow: hidden;
+    }
+
+    .plot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .diagram-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .diagram-card.full {
+      grid-column: 1 / -1;
+    }
+
+    .diagram-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .diagram-card-header h3 {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .diagram-card-header span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .diagram-card svg {
+      display: block;
+      width: 100%;
+      height: 210px;
+    }
+
+    .beam-card svg {
+      height: 230px;
+    }
+
+    .svg-grid {
+      stroke: #e7edf4;
+      stroke-width: 1;
+    }
+
+    .axis {
+      stroke: #7e8fa1;
+      stroke-width: 1.4;
+    }
+
+    .curve-blue {
+      fill: rgba(0, 98, 184, 0.10);
+      stroke: #0062b8;
+      stroke-width: 3;
+    }
+
+    .curve-navy {
+      fill: rgba(0, 46, 93, 0.10);
+      stroke: #002e5d;
+      stroke-width: 3;
+    }
+
+    .curve-red {
+      fill: rgba(163, 58, 58, 0.08);
+      stroke: #a33a3a;
+      stroke-width: 3;
+    }
+
+    .check-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .check-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+    }
+
+    .check-card h3 {
+      margin: 0 0 5px;
+      font-size: 13px;
+    }
+
+    .check-card p {
+      margin: 3px 0;
+      color: #536579;
+      font-size: 12px;
+    }
+
+    .check-badge {
+      min-width: 66px;
+      padding: 9px 10px;
+      border-radius: 999px;
+      text-align: center;
+      color: var(--pass);
+      background: #e7f6ef;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .footer-note {
+      padding: 0 16px 14px;
+      color: #718096;
+      font-size: 11px;
+    }
+
+    [aria-invalid="true"] {
+      border-color: #b42318 !important;
+      background: #fff8f7 !important;
+    }
+
+    .validation-banner {
+      grid-column: 1 / -1;
+      display: none;
+      padding: 10px 12px;
+      border: 1px solid #f2c0b9;
+      border-radius: 8px;
+      color: #7a271a;
+      background: #fff4f2;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .results-column.results-invalid .validation-banner {
+      display: block;
+    }
+
+    .results-column.results-invalid .plot-panel {
+      opacity: 0.58;
+    }
+
+    @media (max-width: 980px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .input-panel {
+        width: 100%;
+      }
+
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        height: 64px;
+        padding: 0 14px;
+      }
+
+      .cougar-mark {
+        width: 40px;
+        height: 40px;
+      }
+
+      .brand-text strong {
+        font-size: 17px;
+      }
+
+      .example-badge {
+        display: none;
+      }
+
+      .app-shell {
+        padding: 12px;
+        gap: 12px;
+      }
+
+      .summary-grid,
+      .plot-grid,
+      .check-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .diagram-card.full {
+        grid-column: auto;
+      }
+
+      .diagram-card svg {
+        height: 190px;
+      }
+
+      .beam-card svg {
+        height: 210px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="Beam Designer, BYU Cougars">
+      <div class="cougar-mark" aria-hidden="true">BYU</div>
+      <div class="brand-text">
+        <strong>Beam Designer</strong>
+        <span>BYU Cougars</span>
+      </div>
+    </div>
+    <div class="example-badge">Example beam loaded</div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="panel input-panel" aria-labelledby="inputs-title">
+      <div class="panel-heading">
+        <h2 id="inputs-title">Beam Inputs</h2>
+        <button class="reset-button" id="reset-button" type="button">Reset</button>
+      </div>
+
+      <div class="input-content">
+        <fieldset class="field">
+          <legend>Unit system</legend>
+          <div class="unit-toggle">
+            <input id="unit-us" type="radio" name="unit" checked>
+            <label for="unit-us">US customary</label>
+            <input id="unit-metric" type="radio" name="unit">
+            <label for="unit-metric">Metric</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend>Support type</legend>
+          <div class="support-toggle">
+            <input id="support-simple" type="radio" name="support" checked>
+            <label for="support-simple">Simply supported</label>
+            <input id="support-cantilever" type="radio" name="support">
+            <label for="support-cantilever">Cantilever</label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="span">Span (ft)</label>
+          <input id="span" type="number" value="20" min="0.1" max="1000" step="0.1">
+        </div>
+
+        <div class="section-divider">Point loads</div>
+        <div id="point-load-list"></div>
+        <template id="point-load-template">
+        <div class="load-card" data-load-type="point">
+          <button class="remove" type="button" aria-label="Remove point load">×</button>
+          <div class="load-title">Point load</div>
+          <div class="load-grid">
+            <div class="field">
+              <label for="point-mag">Magnitude (kip)</label>
+              <input class="point-magnitude" type="number" value="1" min="0" max="1000" step="0.1">
+            </div>
+            <div class="field">
+              <label for="point-pos">Position (ft)</label>
+              <input class="point-position" type="number" value="10" min="0" max="20" step="0.1">
+            </div>
+          </div>
+          <fieldset class="origin-toggle">
+            <legend class="sr-only">Point-load position origin</legend>
+            <input class="point-origin-left" type="radio" checked>
+            <label>From left</label>
+            <input class="point-origin-right" type="radio">
+            <label>From right</label>
+          </fieldset>
+        </div>
+        </template>
+        <button class="add-button" id="add-point-load" type="button">+ Add point load</button>
+
+        <div class="section-divider">Uniform loads</div>
+        <div id="uniform-load-list"></div>
+        <template id="uniform-load-template">
+        <div class="load-card" data-load-type="uniform">
+          <button class="remove" type="button" aria-label="Remove uniform load">×</button>
+          <div class="load-title">Uniform load</div>
+          <div class="load-grid three">
+            <div class="field">
+              <label for="uniform-mag">Magnitude (kip/ft)</label>
+              <input class="uniform-magnitude" type="number" value="1" min="0" max="100" step="0.1">
+            </div>
+            <div class="field">
+              <label for="uniform-start">Start (ft)</label>
+              <input class="uniform-start" type="number" value="0" min="0" max="20" step="0.1">
+            </div>
+            <div class="field">
+              <label for="uniform-end">End (ft)</label>
+              <input class="uniform-end" type="number" value="20" min="0" max="20" step="0.1">
+            </div>
+          </div>
+          <fieldset class="origin-toggle">
+            <legend class="sr-only">Uniform-load position origin</legend>
+            <input class="uniform-origin-left" type="radio" checked>
+            <label>From left</label>
+            <input class="uniform-origin-right" type="radio">
+            <label>From right</label>
+          </fieldset>
+        </div>
+        </template>
+        <button class="add-button" id="add-uniform-load" type="button">+ Add uniform load</button>
+
+        <div class="section-divider">Member</div>
+        <div class="field">
+          <label for="member-category">Member category</label>
+          <select id="member-category">
+            <option value="steel" selected>Steel W-shape</option>
+            <option value="lumber">Lumber</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="member-preset">Member preset</label>
+          <select id="member-preset">
+            <option selected>W12×26</option>
+            <option>W10×22</option>
+            <option>W14×30</option>
+            <option>W16×36</option>
+            <option>W18×40</option>
+          </select>
+        </div>
+        <div class="field" id="steel-material-field">
+          <label for="steel-grade">Steel grade</label>
+          <select id="steel-grade">
+            <option selected>A992</option>
+            <option>A36</option>
+            <option>A572 Grade 50</option>
+          </select>
+        </div>
+        <div class="field" id="lumber-material-field" hidden>
+          <label for="lumber-species">Lumber species and grade</label>
+          <select id="lumber-species">
+            <option selected>Douglas Fir-Larch No.1</option>
+            <option>Douglas Fir-Larch No.2</option>
+            <option>Southern Pine No.1</option>
+            <option>Hem-Fir No.2</option>
+          </select>
+        </div>
+      </div>
+    </aside>
+
+    <section class="results-column" aria-label="Beam analysis results">
+      <div class="summary-grid" aria-label="Result summary">
+        <div class="validation-banner" role="alert">Results unavailable: correct the highlighted input values.</div>
+        <article class="metric-card">
+          <div class="label">Maximum moment</div>
+          <div class="value">50.0 kip-ft</div>
+          <div class="detail">at x = 10.0 ft</div>
+        </article>
+        <article class="metric-card">
+          <div class="label">Maximum shear</div>
+          <div class="value">10.0 kip</div>
+          <div class="detail">at x = 0.0 ft</div>
+        </article>
+        <article class="metric-card">
+          <div class="label">Maximum deflection</div>
+          <div class="value">0.609 in</div>
+          <div class="detail">at x = 10.0 ft</div>
+        </article>
+        <article class="metric-card status-pass">
+          <div class="label">Overall result</div>
+          <div class="value">PASS</div>
+          <div class="detail">Both checks pass</div>
+        </article>
+      </div>
+
+      <div class="panel plot-panel">
+        <div class="panel-heading">
+          <h2>Beam and Diagrams</h2>
+          <span class="example-badge" style="color:#64748b;border-color:#d8e2ec">Placeholder output</span>
+        </div>
+        <div class="plot-grid">
+          <article class="diagram-card beam-card full">
+            <div class="diagram-card-header">
+              <h3>Beam, Loads, and Reactions</h3>
+              <span>L = 20.0 ft</span>
+            </div>
+            <svg viewBox="0 0 900 230" role="img" aria-label="Mock beam with supports, loads, and reactions">
+              <line class="svg-grid" x1="70" y1="55" x2="830" y2="55"/>
+              <line class="svg-grid" x1="70" y1="115" x2="830" y2="115"/>
+              <line class="svg-grid" x1="70" y1="175" x2="830" y2="175"/>
+              <line class="axis" x1="70" y1="115" x2="830" y2="115"/>
+              <rect x="70" y="108" width="760" height="14" rx="7" fill="#002e5d"/>
+
+              <g fill="#fff" stroke="#002e5d" stroke-width="3">
+                <path d="M70 122 L40 165 L100 165 Z"/>
+                <path id="right-support" d="M830 122 L800 165 L860 165 Z"/>
+              </g>
+              <g id="cantilever-support" fill="none" stroke="#002e5d"
+                stroke-width="4" style="display:none">
+                <rect x="42" y="122" width="28" height="50" fill="#eaf3fb"/>
+                <line x1="42" y1="172" x2="18" y2="172"/>
+                <line x1="42" y1="160" x2="18" y2="160"/>
+                <line x1="42" y1="148" x2="18" y2="148"/>
+              </g>
+
+              <g fill="#0062b8" stroke="#0062b8" stroke-width="2">
+                <line x1="150" y1="64" x2="150" y2="102"/>
+                <path d="M150 102 L144 94 L156 94 Z" stroke="none"/>
+                <line x1="226" y1="64" x2="226" y2="102"/>
+                <path d="M226 102 L220 94 L232 94 Z" stroke="none"/>
+                <line x1="302" y1="64" x2="302" y2="102"/>
+                <path d="M302 102 L296 94 L308 94 Z" stroke="none"/>
+                <line x1="378" y1="64" x2="378" y2="102"/>
+                <path d="M378 102 L372 94 L384 94 Z" stroke="none"/>
+                <line x1="454" y1="64" x2="454" y2="102"/>
+                <path d="M454 102 L448 94 L460 94 Z" stroke="none"/>
+                <line x1="530" y1="64" x2="530" y2="102"/>
+                <path d="M530 102 L524 94 L536 94 Z" stroke="none"/>
+                <line x1="606" y1="64" x2="606" y2="102"/>
+                <path d="M606 102 L600 94 L612 94 Z" stroke="none"/>
+                <line x1="682" y1="64" x2="682" y2="102"/>
+                <path d="M682 102 L676 94 L688 94 Z" stroke="none"/>
+                <line x1="758" y1="64" x2="758" y2="102"/>
+                <path d="M758 102 L752 94 L764 94 Z" stroke="none"/>
+                <line x1="830" y1="64" x2="830" y2="102"/>
+                <path d="M830 102 L824 94 L836 94 Z" stroke="none"/>
+              </g>
+
+              <g fill="#172434" font-size="14" font-weight="700" text-anchor="middle">
+                <text x="450" y="24">P = 12.0 kip</text>
+                <text x="450" y="192">x = 10.0 ft</text>
+                <text x="70" y="194">0 ft</text>
+                <text x="830" y="194">20 ft</text>
+              </g>
+
+              <g fill="#172434" font-size="13" font-weight="700">
+                <text x="70" y="213">Rₗ = 10.0 kip</text>
+                <text x="830" y="213" text-anchor="end">Rᵣ = 10.0 kip</text>
+              </g>
+            </svg>
+          </article>
+
+          <article class="diagram-card">
+            <div class="diagram-card-header">
+              <h3>Shear Diagram V(x)</h3>
+              <span>Vmax = 10.0 kip at x = 0 ft</span>
+            </div>
+            <svg viewBox="0 0 600 210" role="img" aria-label="Placeholder shear diagram">
+              <line class="svg-grid" x1="55" y1="35" x2="565" y2="35"/>
+              <line class="svg-grid" x1="55" y1="105" x2="565" y2="105"/>
+              <line class="svg-grid" x1="55" y1="175" x2="565" y2="175"/>
+              <line class="axis" x1="55" y1="105" x2="565" y2="105"/>
+              <line class="axis" x1="55" y1="35" x2="55" y2="175"/>
+              <path class="curve-blue" d="M55 55 L310 55 L310 155 L565 155 L565 105 L55 105 Z"/>
+              <g fill="#536579" font-size="11" text-anchor="middle">
+                <text x="55" y="194">0 ft</text>
+                <text x="310" y="194">10 ft</text>
+                <text x="565" y="194">20 ft</text>
+              </g>
+              <g fill="#536579" font-size="11">
+                <text x="8" y="58">+10 kip</text>
+                <text x="8" y="158">−10 kip</text>
+              </g>
+            </svg>
+          </article>
+
+          <article class="diagram-card">
+            <div class="diagram-card-header">
+              <h3>Moment Diagram M(x)</h3>
+              <span>Mmax = 50.0 kip-ft at x = 10 ft</span>
+            </div>
+            <svg viewBox="0 0 600 210" role="img" aria-label="Placeholder moment diagram">
+              <line class="svg-grid" x1="55" y1="35" x2="565" y2="35"/>
+              <line class="svg-grid" x1="55" y1="105" x2="565" y2="105"/>
+              <line class="svg-grid" x1="55" y1="175" x2="565" y2="175"/>
+              <line class="axis" x1="55" y1="105" x2="565" y2="105"/>
+              <line class="axis" x1="55" y1="35" x2="55" y2="175"/>
+              <path class="curve-navy" d="M55 105 Q310 20 565 105 L565 105 Z"/>
+              <line x1="310" y1="105" x2="310" y2="53" stroke="#002e5d" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <circle cx="310" cy="53" r="5" fill="#fff" stroke="#002e5d" stroke-width="3"/>
+              <g fill="#536579" font-size="11" text-anchor="middle">
+                <text x="55" y="194">0 ft</text>
+                <text x="310" y="194">10 ft</text>
+                <text x="565" y="194">20 ft</text>
+              </g>
+              <g fill="#536579" font-size="11">
+                <text x="8" y="58">+50</text>
+                <text x="8" y="158">−50</text>
+              </g>
+            </svg>
+          </article>
+
+          <article class="diagram-card full">
+            <div class="diagram-card-header">
+              <h3>Deflection Diagram v(x)</h3>
+              <span>vmax = 0.609 in at x = 10 ft · L/360 = 0.667 in</span>
+            </div>
+            <svg viewBox="0 0 900 210" role="img" aria-label="Placeholder deflection diagram">
+              <line class="svg-grid" x1="55" y1="35" x2="860" y2="35"/>
+              <line class="svg-grid" x1="55" y1="105" x2="860" y2="105"/>
+              <line class="svg-grid" x1="55" y1="175" x2="860" y2="175"/>
+              <line class="axis" x1="55" y1="105" x2="860" y2="105" stroke-dasharray="7 5"/>
+              <line class="axis" x1="55" y1="35" x2="55" y2="175"/>
+              <path class="curve-red" d="M55 105 Q458 210 860 105 L860 105 Z"/>
+              <line x1="458" y1="105" x2="458" y2="160" stroke="#a33a3a" stroke-width="1.5" stroke-dasharray="5 4"/>
+              <circle cx="458" cy="160" r="5" fill="#fff" stroke="#a33a3a" stroke-width="3"/>
+              <g fill="#536579" font-size="11" text-anchor="middle">
+                <text x="55" y="194">0 ft</text>
+                <text x="458" y="194">10 ft</text>
+                <text x="860" y="194">20 ft</text>
+              </g>
+              <g fill="#536579" font-size="11">
+                <text x="8" y="58">0.5 in</text>
+                <text x="8" y="158">−0.609 in</text>
+              </g>
+            </svg>
+          </article>
+        </div>
+
+        <div class="check-grid">
+          <article class="check-card">
+            <div>
+              <h3>Bending Check</h3>
+              <p><strong>PASS</strong> · 12.6 ksi ≤ 24 ksi</p>
+              <p>Sₓ = 33.4 in³ · Utilization = 52.5%</p>
+            </div>
+            <div class="check-badge">PASS</div>
+          </article>
+          <article class="check-card">
+            <div>
+              <h3>Deflection Check</h3>
+              <p><strong>PASS</strong> · 0.609 in ≤ 0.667 in</p>
+              <p>Utilization = 91.3%</p>
+            </div>
+            <div class="check-badge">PASS</div>
+          </article>
+        </div>
+        <div class="footer-note">
+          Placeholder example values only. No structural calculations are performed.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const memberCategory = document.getElementById("member-category");
+    const memberPreset = document.getElementById("member-preset");
+    const steelMaterialField = document.getElementById("steel-material-field");
+    const lumberMaterialField = document.getElementById("lumber-material-field");
+    const spanInput = document.getElementById("span");
+    const pointLoadList = document.getElementById("point-load-list");
+    const uniformLoadList = document.getElementById("uniform-load-list");
+    const pointTemplate = document.getElementById("point-load-template");
+    const uniformTemplate = document.getElementById("uniform-load-template");
+    const resultsColumn = document.querySelector(".results-column");
+    const summaryCards = Array.from(document.querySelectorAll(".summary-grid .metric-card"));
+    const summaryPlaceholders = summaryCards.map((card) => ({
+      value: card.querySelector(".value").textContent,
+      detail: card.querySelector(".detail").textContent
+    }));
+    let activeUnit = "us";
+    let pointLoadCount = 0;
+    let uniformLoadCount = 0;
+
+    const memberOptions = {
+      steel: [
+        "W12×26",
+        "W10×22",
+        "W14×30",
+        "W16×36",
+        "W18×40"
+      ],
+      lumber: [
+        "2×4",
+        "2×6",
+        "2×8",
+        "2×10",
+        "2×12",
+        "4×4",
+        "4×6",
+        "6×6"
+      ]
+    };
+
+    function updateMemberFields() {
+      const isSteel = memberCategory.value === "steel";
+      const options = memberOptions[memberCategory.value];
+
+      memberPreset.replaceChildren(
+        ...options.map((option, index) => {
+          const item = document.createElement("option");
+          item.textContent = option;
+          item.value = option;
+          item.selected = isSteel ? option === "W12×26" : index === 0;
+          return item;
+        })
+      );
+
+      steelMaterialField.hidden = !isSteel;
+      lumberMaterialField.hidden = isSteel;
+    }
+
+    memberCategory.addEventListener("change", updateMemberFields);
+
+    function setInvalid(input, invalid) {
+      input.setAttribute("aria-invalid", invalid ? "true" : "false");
+      input.setAttribute("title", invalid ? "Value outside the allowed range" : "");
+    }
+
+    function getSpanLimit() {
+      return activeUnit === "us" ? 1000 : 304.8;
+    }
+
+    function validateInputs() {
+      let invalid = false;
+      const span = Number(spanInput.value);
+      const spanMax = getSpanLimit();
+      const spanMin = activeUnit === "us" ? 0.1 : 0.03048;
+      setInvalid(spanInput, !Number.isFinite(span) || span < spanMin || span > spanMax);
+      invalid ||= spanInput.getAttribute("aria-invalid") === "true";
+
+      pointLoadList.querySelectorAll(".load-card").forEach((card) => {
+        const magnitude = card.querySelector(".point-magnitude");
+        const position = card.querySelector(".point-position");
+        const magnitudeMax = activeUnit === "us" ? 1000 : 4448.22;
+        const pointMagnitude = Number(magnitude.value);
+        const pointPosition = Number(position.value);
+
+        setInvalid(magnitude,
+          !Number.isFinite(pointMagnitude) || pointMagnitude < 0 || pointMagnitude > magnitudeMax);
+        setInvalid(position,
+          !Number.isFinite(pointPosition) || pointPosition < 0 ||
+          pointPosition > span || position.value === "");
+
+        invalid ||= magnitude.getAttribute("aria-invalid") === "true";
+        invalid ||= position.getAttribute("aria-invalid") === "true";
+      });
+
+      uniformLoadList.querySelectorAll(".load-card").forEach((card) => {
+        const magnitude = card.querySelector(".uniform-magnitude");
+        const start = card.querySelector(".uniform-start");
+        const end = card.querySelector(".uniform-end");
+        const magnitudeMax = activeUnit === "us" ? 100 : 1459.3;
+        const uniformMagnitude = Number(magnitude.value);
+        const uniformStart = Number(start.value);
+        const uniformEnd = Number(end.value);
+
+        setInvalid(magnitude,
+          !Number.isFinite(uniformMagnitude) || uniformMagnitude < 0 ||
+          uniformMagnitude > magnitudeMax);
+        setInvalid(start,
+          !Number.isFinite(uniformStart) || uniformStart < 0 ||
+          uniformStart >= uniformEnd || uniformStart > span);
+        setInvalid(end,
+          !Number.isFinite(uniformEnd) || uniformEnd <= uniformStart ||
+          uniformEnd > span);
+
+        invalid ||= magnitude.getAttribute("aria-invalid") === "true";
+        invalid ||= start.getAttribute("aria-invalid") === "true";
+        invalid ||= end.getAttribute("aria-invalid") === "true";
+      });
+
+      resultsColumn.classList.toggle("results-invalid", invalid);
+      summaryCards.forEach((card, index) => {
+        if (invalid) {
+          card.querySelector(".value").textContent = "Unavailable";
+          card.querySelector(".detail").textContent = "Correct highlighted inputs";
+        } else {
+          card.querySelector(".value").textContent = summaryPlaceholders[index].value;
+          card.querySelector(".detail").textContent = summaryPlaceholders[index].detail;
+        }
+      });
+    }
+
+    function renumberLoads() {
+      pointLoadList.querySelectorAll(".load-card").forEach((card, index) => {
+        card.querySelector(".load-title").textContent = `Point load ${index + 1}`;
+      });
+      uniformLoadList.querySelectorAll(".load-card").forEach((card, index) => {
+        card.querySelector(".load-title").textContent = `Uniform load ${index + 1}`;
+      });
+    }
+
+    function assignLoadRadioNames(card, prefix) {
+      const left = card.querySelector(`.${prefix}-origin-left`);
+      const right = card.querySelector(`.${prefix}-origin-right`);
+      if (prefix === "point") {
+        pointLoadCount += 1;
+      } else {
+        uniformLoadCount += 1;
+      }
+      const index = prefix === "point" ? pointLoadCount : uniformLoadCount;
+      const name = `${prefix}-origin-${index}`;
+      left.name = name;
+      right.name = name;
+      left.id = `${name}-left`;
+      right.id = `${name}-right`;
+      left.nextElementSibling.setAttribute("for", left.id);
+      right.nextElementSibling.setAttribute("for", right.id);
+    }
+
+    function addPointLoad(values = {}) {
+      const card = pointTemplate.content.firstElementChild.cloneNode(true);
+      const magnitude = card.querySelector(".point-magnitude");
+      const position = card.querySelector(".point-position");
+      const isMetric = activeUnit === "metric";
+
+      magnitude.value = values.magnitude ?? (isMetric ? "4.448" : "1");
+      position.value = values.position ?? (isMetric ? "3.048" : "10");
+      magnitude.closest(".field").querySelector("label").textContent =
+        `Magnitude (${isMetric ? "kN" : "kip"})`;
+      position.closest(".field").querySelector("label").textContent =
+        `Position (${isMetric ? "m" : "ft"})`;
+      assignLoadRadioNames(card, "point");
+      card.querySelector(".remove").addEventListener("click", () => {
+        card.remove();
+        renumberLoads();
+        validateInputs();
+      });
+      card.querySelectorAll("input").forEach((input) =>
+        input.addEventListener("input", validateInputs));
+      pointLoadList.appendChild(card);
+      renumberLoads();
+      validateInputs();
+    }
+
+    function addUniformLoad(values = {}) {
+      const card = uniformTemplate.content.firstElementChild.cloneNode(true);
+      const magnitude = card.querySelector(".uniform-magnitude");
+      const start = card.querySelector(".uniform-start");
+      const end = card.querySelector(".uniform-end");
+      const isMetric = activeUnit === "metric";
+      const span = Number(spanInput.value) || (isMetric ? 6.096 : 20);
+
+      magnitude.value = values.magnitude ?? (isMetric ? "14.593" : "1");
+      start.value = values.start ?? "0";
+      end.value = values.end ?? span;
+      magnitude.closest(".field").querySelector("label").textContent =
+        `Magnitude (${isMetric ? "kN/m" : "kip/ft"})`;
+      start.closest(".field").querySelector("label").textContent =
+        `Start (${isMetric ? "m" : "ft"})`;
+      end.closest(".field").querySelector("label").textContent =
+        `End (${isMetric ? "m" : "ft"})`;
+      assignLoadRadioNames(card, "uniform");
+      card.querySelector(".remove").addEventListener("click", () => {
+        card.remove();
+        renumberLoads();
+        validateInputs();
+      });
+      card.querySelectorAll("input").forEach((input) =>
+        input.addEventListener("input", validateInputs));
+      uniformLoadList.appendChild(card);
+      renumberLoads();
+      validateInputs();
+    }
+
+    document.getElementById("add-point-load").addEventListener("click", () => addPointLoad());
+    document.getElementById("add-uniform-load").addEventListener("click", () => addUniformLoad());
+
+    spanInput.addEventListener("input", () => {
+      pointLoadList.querySelectorAll(".point-position").forEach((input) => {
+        input.max = spanInput.value;
+      });
+      uniformLoadList.querySelectorAll(".uniform-start, .uniform-end").forEach((input) => {
+        input.max = spanInput.value;
+      });
+      updateBeamHeader();
+      validateInputs();
+    });
+
+    function updateUnitLabels() {
+      const isMetric = activeUnit === "metric";
+      spanInput.closest(".field").querySelector("label").textContent =
+        `Span (${isMetric ? "m" : "ft"})`;
+      spanInput.step = isMetric ? "0.001" : "0.1";
+      updateBeamHeader();
+      pointLoadList.querySelectorAll(".load-card").forEach((card) => {
+        card.querySelector(".point-magnitude").closest(".field").querySelector("label").textContent =
+          `Magnitude (${isMetric ? "kN" : "kip"})`;
+        card.querySelector(".point-position").closest(".field").querySelector("label").textContent =
+          `Position (${isMetric ? "m" : "ft"})`;
+      });
+      uniformLoadList.querySelectorAll(".load-card").forEach((card) => {
+        card.querySelector(".uniform-magnitude").closest(".field").querySelector("label").textContent =
+          `Magnitude (${isMetric ? "kN/m" : "kip/ft"})`;
+        card.querySelector(".uniform-start").closest(".field").querySelector("label").textContent =
+          `Start (${isMetric ? "m" : "ft"})`;
+        card.querySelector(".uniform-end").closest(".field").querySelector("label").textContent =
+          `End (${isMetric ? "m" : "ft"})`;
+      });
+    }
+
+    function updateBeamHeader() {
+      const beamHeader = document.querySelector(".beam-card .diagram-card-header span");
+      if (!beamHeader) return;
+      const isCantilever = document.getElementById("support-cantilever").checked;
+      beamHeader.textContent =
+        `${isCantilever ? "Cantilever" : "Simply supported"} · L = ${spanInput.value} ${activeUnit === "metric" ? "m" : "ft"}`;
+    }
+
+    function updateSupportVisualization() {
+      const isCantilever = document.getElementById("support-cantilever").checked;
+      document.getElementById("right-support").style.display = isCantilever ? "none" : "";
+      document.getElementById("cantilever-support").style.display = isCantilever ? "" : "none";
+      updateBeamHeader();
+    }
+
+    function convertValues(nextUnit) {
+      if (nextUnit === activeUnit) return;
+      const toMetric = nextUnit === "metric";
+
+      const convert = (input, factor) => {
+        if (input.value !== "" && Number.isFinite(Number(input.value))) {
+          input.value = (Number(input.value) * (toMetric ? factor : 1 / factor)).toFixed(
+            toMetric ? 3 : 3
+          );
+        }
+      };
+
+      convert(spanInput, 0.3048);
+      pointLoadList.querySelectorAll(".point-magnitude").forEach((input) =>
+        convert(input, 4.448221615));
+      pointLoadList.querySelectorAll(".point-position").forEach((input) =>
+        convert(input, 0.3048));
+      uniformLoadList.querySelectorAll(".uniform-magnitude").forEach((input) =>
+        convert(input, 14.5939029));
+      uniformLoadList.querySelectorAll(".uniform-start, .uniform-end").forEach((input) =>
+        convert(input, 0.3048));
+      activeUnit = nextUnit;
+      updateUnitLabels();
+      validateInputs();
+    }
+
+    document.querySelectorAll('input[name="unit"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        convertValues(radio.id === "unit-metric" ? "metric" : "us");
+      });
+    });
+
+    document.querySelectorAll('input[name="support"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        if (radio.checked) {
+          updateSupportVisualization();
+        }
+      });
+    });
+
+    document.getElementById("reset-button").addEventListener("click", () => {
+      document.getElementById("unit-us").checked = true;
+      document.getElementById("support-simple").checked = true;
+      activeUnit = "us";
+      spanInput.value = "20";
+      pointLoadList.replaceChildren();
+      uniformLoadList.replaceChildren();
+      pointLoadCount = 0;
+      uniformLoadCount = 0;
+      memberCategory.value = "steel";
+      updateMemberFields();
+      addPointLoad({ magnitude: 1, position: 10 });
+      addUniformLoad({ magnitude: 1, start: 0, end: 20 });
+      updateUnitLabels();
+      updateSupportVisualization();
+      validateInputs();
+    });
+
+    addPointLoad({ magnitude: 1, position: 10 });
+    addUniformLoad({ magnitude: 1, start: 0, end: 20 });
+    updateMemberFields();
+    updateSupportVisualization();
+    validateInputs();
+  </script>
+</body>
+</html>

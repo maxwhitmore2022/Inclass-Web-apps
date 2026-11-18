@@ -10,3 +10,9 @@
 - 2026-11-18: Updated the Look and feel, Validation, and Out of scope sections of `spec.md` with layout, accessibility, test coverage, numerical tolerances, and explicit exclusions. Completed successfully.
 - 2026-11-18: Removed the in-line look-and-feel note from `spec.md` and moved it to a new `Resolved notes` section at the bottom. Completed successfully.
 - 2026-11-18: Moved the royal-blue, white, and BYU Cougar logo instruction back into the Look and feel section of `spec.md` and removed it from the bottom notes section. Completed successfully.
+- 2026-11-18: Added five testable build stages and their test checklists to the end of `spec.md` under `## Build stages`. Completed successfully.
+- 2026-11-18: Built Stage 1 as a static, single-file HTML/CSS mockup in `index.html`, with every documented input/output and placeholder plot; no calculations were implemented. Completed successfully.
+- 2026-11-18: Updated the member section in `index.html` so steel shows steel W-shape presets and steel grades, while lumber shows lumber size presets and lumber species/grades only. Completed successfully.
+- 2026-11-18: Normalized the beam reaction diagram arrows in `index.html` using one shared SVG arrowhead and even spacing. Completed successfully.
+- 2026-11-18: Replaced the beam/load/reaction arrows with exactly 10 small, evenly spaced vertical downward arrows. Completed successfully.
+- 2026-11-18: Moved the mockup into Stage 2 by adding repeatable loads, unit conversion, reset behavior, support/member interactions, and inline input validation. No calculations were added. Completed successfully.

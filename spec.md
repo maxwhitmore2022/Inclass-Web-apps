@@ -398,3 +398,97 @@ whether the beam is strong and stiff enough.
   and foundation design.
 - Professional or code certification. The app is an analysis and
   educational tool, not a substitute for a structural engineer.
+
+## Build stages
+
+### Stage 1: Static mockup and page shell
+Create the responsive royal-blue-and-white layout without real
+calculations:
+
+- Header with the app title and a placeholder for the BYU Cougar logo.
+- Input panel with unit system, support, span, load, and member controls.
+- Beam sketch and placeholders for shear, moment, and deflection.
+- Summary cards for reactions, bending, deflection, and overall status.
+- Clearly labeled example values that are not presented as calculations.
+
+Test checklist:
+
+- Open `index.html` directly and verify the complete mockup.
+- Check desktop and narrow-screen layouts for overflow and usability.
+- Verify the royal-blue/white theme and top-left logo placement.
+- Confirm all major sections from the spec are visible.
+- Confirm no values are presented as calculated results.
+
+### Stage 2: Interactive inputs and validation
+Add state and controls for the documented inputs:
+
+- US/metric toggle with value conversion.
+- Support and span controls.
+- Repeatable point-load and uniform-load rows.
+- Member category and preset dropdowns.
+- Reset behavior and inline validation.
+
+Test checklist:
+
+- Switch support types and update the visible support-specific controls.
+- Add, edit, and remove multiple point and uniform loads.
+- Test positions at both ends and invalid reversed or out-of-range loads.
+- Toggle units and confirm values convert without changing beam geometry.
+- Change members and confirm steel/lumber presets update.
+- Reset and verify all values return to documented defaults.
+- Verify invalid input produces inline errors and unavailable results.
+
+### Stage 3: Statics and beam/shear/moment diagrams
+Implement reaction, shear, and moment calculations:
+
+- Convert inputs to one consistent internal unit system.
+- Solve reactions for simply supported and cantilever beams.
+- Generate shear and moment boundary points.
+- Draw the beam, supports, loads, reactions, and diagrams.
+
+Test checklist:
+
+- Validate the 20 ft simply supported W12x26 with 1 kip/ft case:
+  reactions are 10 kip each and maximum moment is 50 kip-ft.
+- Check centered and off-center point loads by hand.
+- Check full-span and partial-span uniform loads.
+- Check cantilever end-point-load and full-span uniform-load cases.
+- Confirm sign conventions, zero crossings, and boundary labels.
+- Verify the unit toggle leaves physical results unchanged.
+
+### Stage 4: Deflection and member checks
+Add deflection and bending-strength calculations:
+
+- Integrate `EI v'' = -M` with correct support boundary conditions.
+- Find maximum downward deflection and location.
+- Apply strong-axis `I_x` and `S_x` member properties.
+- Calculate bending stress, utilization, `L/360`, and overall status.
+
+Test checklist:
+
+- Match the validation case's 0.609 in maximum deflection.
+- Check simply supported and cantilever deflection shapes independently.
+- Confirm maximum deflection location and value are stable.
+- Verify one passing and one failing bending case.
+- Verify one passing and one failing deflection case.
+- Confirm pass/fail decisions use full precision, not displayed precision.
+- Confirm metric results are equivalent within the specified tolerances.
+
+### Stage 5: Polish, accessibility, and release verification
+Finish responsive behavior and the full validation matrix:
+
+- Improve labels, legends, status icons, and result formatting.
+- Add keyboard support, focus states, semantic labels, and text alternatives.
+- Use text plus icons for PASS, FAIL, and invalid states.
+- Record test outputs in `02_validation/` and screenshots or exports in
+  `03_output/`.
+- Keep all app implementation in top-level `index.html`.
+
+Test checklist:
+
+- Run the Validation test matrix and record actual versus expected values.
+- Check desktop/mobile layouts and keyboard navigation.
+- Verify preset-only steel/lumber selection.
+- Confirm out-of-scope features are not exposed.
+- Test the final page directly and through GitHub Pages.
+- Confirm no console errors, stale outputs, or misleading invalid states.
