@@ -332,6 +332,18 @@ whether the beam is strong and stiff enough.
   stylized hair shape above the panda face.
 - Use a smaller mascot size on narrow screens and disable movement
   transitions when the user has enabled reduced-motion preferences.
+- Provide a Light/Dark theme toggle in the page header.
+- Default to the user's saved theme preference. On a first visit, follow
+  the operating-system color scheme and fall back to light mode if no
+  preference is available.
+- Save the selected theme locally so it persists after reload.
+- Apply the theme to the page background, panels, inputs, borders, text,
+  diagrams, status cards, controls, and native scrollbars.
+- Preserve royal-blue and BYU branding in both themes.
+- Use text and an icon for the theme control and update its accessible label.
+- Make the toggle keyboard-operable and respect reduced-motion preferences
+  for any theme transition.
+- Print and export reports should use a clear, light, high-contrast format.
 
 ### Initial state
 - Open with the default simply supported 20 ft beam loaded by the
@@ -500,3 +512,7 @@ Test checklist:
 - Confirm out-of-scope features are not exposed.
 - Test the final page directly and through GitHub Pages.
 - Confirm no console errors, stale outputs, or misleading invalid states.
+- Test Light and Dark themes at desktop and mobile widths.
+- Reload after selecting a theme and confirm it persists.
+- Test system-theme fallback, keyboard operation, print, export, and contrast
+  in both themes.

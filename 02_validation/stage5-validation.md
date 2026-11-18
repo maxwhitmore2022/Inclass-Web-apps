@@ -24,3 +24,8 @@ Record actual results with the date and unit system used.
 | Keyboard navigation | Inputs, reset, export, print, and results are operable and readable |  |  |
 | Mobile layout | No horizontal page overflow and all controls remain usable |  |  |
 | Print/export | Print layout and JSON export contain the current result summary |  |  |
+| Light theme | Full page uses the light palette with readable text and controls | Light palette verified in browser | PASS |
+| Dark theme | Full page uses the dark palette with readable text and controls | Dark palette, labels, panels, and controls verified in browser | PASS |
+| Theme persistence | Reload restores the most recently selected theme | Dark selection restored as dark after reload | PASS |
+| System-theme fallback | First visit follows the operating-system preference |  |  |
+| Theme keyboard use | Toggle has visible focus and an accessible name |  |  |
