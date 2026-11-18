@@ -349,6 +349,12 @@
       color: var(--pass);
     }
 
+    .status-fail,
+    .status-fail .value,
+    .status-fail .detail {
+      color: var(--fail);
+    }
+
     .plot-panel {
       overflow: hidden;
     }
@@ -874,46 +880,38 @@
           <article class="diagram-card full">
             <div class="diagram-card-header">
               <h3>Deflection Diagram v(x)</h3>
-              <span>vmax = 0.609 in at x = 10 ft · L/360 = 0.667 in</span>
+              <span id="deflection-header">vmax = 0.609 in at x = 10 ft · L/360 = 0.667 in</span>
             </div>
-            <svg viewBox="0 0 900 210" role="img" aria-label="Placeholder deflection diagram">
+            <svg id="deflection-svg" viewBox="0 0 900 210" role="img" aria-label="Deflection diagram">
               <line class="svg-grid" x1="55" y1="35" x2="860" y2="35"/>
               <line class="svg-grid" x1="55" y1="105" x2="860" y2="105"/>
               <line class="svg-grid" x1="55" y1="175" x2="860" y2="175"/>
               <line class="axis" x1="55" y1="105" x2="860" y2="105" stroke-dasharray="7 5"/>
               <line class="axis" x1="55" y1="35" x2="55" y2="175"/>
-              <path class="curve-red" d="M55 105 Q458 210 860 105 L860 105 Z"/>
-              <line x1="458" y1="105" x2="458" y2="160" stroke="#a33a3a" stroke-width="1.5" stroke-dasharray="5 4"/>
-              <circle cx="458" cy="160" r="5" fill="#fff" stroke="#a33a3a" stroke-width="3"/>
-              <g fill="#536579" font-size="11" text-anchor="middle">
-                <text x="55" y="194">0 ft</text>
-                <text x="458" y="194">10 ft</text>
-                <text x="860" y="194">20 ft</text>
-              </g>
-              <g fill="#536579" font-size="11">
-                <text x="8" y="58">0.5 in</text>
-                <text x="8" y="158">−0.609 in</text>
-              </g>
+              <path id="deflection-curve" class="curve-red" d=""/>
+              <g id="deflection-marker"></g>
+              <g id="deflection-labels" fill="#536579" font-size="11" text-anchor="middle"></g>
+              <g id="deflection-scale" fill="#536579" font-size="11"></g>
             </svg>
           </article>
         </div>
 
         <div class="check-grid">
-          <article class="check-card">
+          <article class="check-card" id="bending-check-card">
             <div>
               <h3>Bending Check</h3>
-              <p><strong>PASS</strong> · 12.6 ksi ≤ 24 ksi</p>
-              <p>Sₓ = 33.4 in³ · Utilization = 52.5%</p>
+              <p id="bending-check-line"><strong>PASS</strong> · 12.6 ksi ≤ 24 ksi</p>
+              <p id="bending-property-line">Sₓ = 33.4 in³ · Utilization = 52.5%</p>
             </div>
-            <div class="check-badge">PASS</div>
+            <div class="check-badge" id="bending-check-badge">PASS</div>
           </article>
-          <article class="check-card">
+          <article class="check-card" id="deflection-check-card">
             <div>
               <h3>Deflection Check</h3>
-              <p><strong>PASS</strong> · 0.609 in ≤ 0.667 in</p>
-              <p>Utilization = 91.3%</p>
+              <p id="deflection-check-line"><strong>PASS</strong> · 0.609 in ≤ 0.667 in</p>
+              <p id="deflection-utilization-line">Utilization = 91.3%</p>
             </div>
-            <div class="check-badge">PASS</div>
+            <div class="check-badge" id="deflection-check-badge">PASS</div>
           </article>
         </div>
         <div class="footer-note">
@@ -963,6 +961,47 @@
       ]
     };
 
+    const steelProperties = {
+      "W12×26": { I: 204, S: 33.4 },
+      "W10×22": { I: 118.7, S: 26.5 },
+      "W14×30": { I: 290, S: 42.3 },
+      "W16×36": { I: 448, S: 57.5 },
+      "W18×40": { I: 612, S: 68.7 }
+    };
+
+    const lumberProperties = {
+      "2×4": { I: 5.359, S: 3.062 },
+      "2×6": { I: 24.1, S: 8.0 },
+      "2×8": { I: 47.6, S: 13.14 },
+      "2×10": { I: 98.9, S: 21.4 },
+      "2×12": { I: 178.0, S: 31.64 },
+      "4×4": { I: 12.51, S: 7.15 },
+      "4×6": { I: 51.1, S: 17.6 },
+      "6×6": { I: 110.3, S: 31.5 }
+    };
+
+    function getMemberProperties() {
+      if (memberCategory.value === "steel") {
+        const preset = steelProperties[memberPreset.value] || steelProperties["W12×26"];
+        const grade = document.getElementById("steel-grade").value;
+        const allowableBending = grade === "A36" ? 22 : grade === "A572 Grade 50" ? 27 : 24;
+        return { I: preset.I, S: preset.S, E: 29000, Fb: allowableBending };
+      }
+
+      const preset = lumberProperties[memberPreset.value] || lumberProperties["2×4"];
+      const grade = document.getElementById("lumber-species").value;
+      let E = 1300;
+      let Fb = 0.75;
+      if (grade.startsWith("Douglas Fir-Larch")) {
+        E = grade.endsWith("No.2") ? 1600 : 1800;
+        Fb = grade.endsWith("No.2") ? 0.85 : 1.0;
+      } else if (grade.startsWith("Southern Pine")) {
+        E = 1600;
+        Fb = 0.90;
+      }
+      return { I: preset.I, S: preset.S, E, Fb };
+    }
+
     function updateMemberFields() {
       const isSteel = memberCategory.value === "steel";
       const options = memberOptions[memberCategory.value];
@@ -979,9 +1018,13 @@
 
       steelMaterialField.hidden = !isSteel;
       lumberMaterialField.hidden = isSteel;
+      validateInputs();
     }
 
     memberCategory.addEventListener("change", updateMemberFields);
+    memberPreset.addEventListener("change", validateInputs);
+    document.getElementById("steel-grade").addEventListener("change", validateInputs);
+    document.getElementById("lumber-species").addEventListener("change", validateInputs);
 
     function setInvalid(input, invalid) {
       input.setAttribute("aria-invalid", invalid ? "true" : "false");
@@ -1042,6 +1085,68 @@
       if (!Number.isFinite(value)) return `Unavailable ${unit}`;
       const fixed = value.toFixed(digits).replace(/\.?0+$/, "");
       return `${fixed} ${unit}`;
+    }
+
+    function calculateDeflectionAndChecks(statics) {
+      const member = getMemberProperties();
+      const values = statics.momentValues;
+      const Lft = statics.span;
+      const Lin = Lft * 12;
+      const dx = Lin / Math.max(values.length - 1, 1);
+
+      let rawSlope = 0;
+      const slopes = [0];
+      const rawDeflections = [0];
+
+      for (let i = 1; i < values.length; i += 1) {
+        const momentLeftInKip = values[i - 1].value * 12;
+        const momentRightInKip = values[i].value * 12;
+        const curvatureLeft = -momentLeftInKip / (member.E * member.I);
+        const curvatureRight = -momentRightInKip / (member.E * member.I);
+        rawSlope += (curvatureLeft + curvatureRight) / 2 * dx;
+        slopes.push(rawSlope);
+
+        const averageSlope = (slopes[i - 1] + slopes[i]) / 2;
+        rawDeflections.push(rawDeflections[i - 1] + averageSlope * dx);
+      }
+
+      let deflections;
+      if (statics.isCantilever) {
+        deflections = rawDeflections.map((value) => value);
+      } else {
+        const boundaryCorrection = -rawDeflections[rawDeflections.length - 1] / Lin;
+        deflections = rawDeflections.map((value, i) => {
+          const x = Lin * i / Math.max(values.length - 1, 1);
+          return value + boundaryCorrection * x;
+        });
+      }
+
+      const deflectionValues = values.map((item, i) => ({
+        x: item.x,
+        value: deflections[i]
+      }));
+
+      const maxDeflection = deflectionValues.reduce((best, item) =>
+        Math.abs(item.value) > Math.abs(best.value) ? item : best,
+      deflectionValues[0] || { x: 0, value: 0 });
+
+      const maxMomentKipFt = Math.abs(statics.maxMoment.value);
+      const bendingStressKsi = maxMomentKipFt * 12 / member.S;
+      const bendingUtilization = bendingStressKsi / member.Fb;
+      const deflectionAllowIn = Lin / 360;
+      const deflectionUtilization = Math.abs(maxDeflection.value) / deflectionAllowIn;
+
+      return {
+        member,
+        deflectionValues,
+        maxDeflection,
+        bendingStressKsi,
+        bendingUtilization,
+        deflectionAllowIn,
+        deflectionUtilization,
+        bendingPass: bendingStressKsi <= member.Fb,
+        deflectionPass: Math.abs(maxDeflection.value) <= deflectionAllowIn
+      };
     }
 
     function calculateStatics() {
@@ -1294,11 +1399,72 @@
         `Mmax = ${formatStat(displayMoment(Math.abs(result.maxMoment.value)), momentUnit, 3)} at x = ${formatStat(displayLength(result.maxMoment.x), lengthUnit, 3)}`;
     }
 
+    function drawDeflection(result, checks) {
+      const svgLabels = document.getElementById("deflection-labels");
+      const svgScale = document.getElementById("deflection-scale");
+      const marker = document.getElementById("deflection-marker");
+      const curve = document.getElementById("deflection-curve");
+      const left = 55;
+      const right = 860;
+      const base = 105;
+      const pointsInDisplay = checks.deflectionValues.map((item) => ({
+        xFt: item.x,
+        valueIn: item.value
+      }));
+      const scale = 58 / Math.max(
+        Math.abs(checks.maxDeflection.value),
+        checks.deflectionAllowIn,
+        0.001
+      );
+      const points = pointsInDisplay.map((item) => {
+        const x = left + (right - left) * item.xFt / result.span;
+        const y = base - item.valueIn * scale;
+        return [x, y];
+      });
+      const path = points.map((point, index) =>
+        `${index === 0 ? "M" : "L"}${point[0].toFixed(1)} ${point[1].toFixed(1)}`
+      ).join(" ") + ` L${right} ${base} L${left} ${base} Z`;
+      curve.setAttribute("d", path);
+
+      const markerX = left + (right - left) * checks.maxDeflection.x / result.span;
+      const markerY = base - checks.maxDeflection.value * scale;
+      marker.innerHTML =
+        `<line x1="${markerX.toFixed(1)}" y1="${base}" x2="${markerX.toFixed(1)}" y2="${markerY.toFixed(1)}" ` +
+        `stroke="#a33a3a" stroke-width="1.5" stroke-dasharray="5 4"/>` +
+        `<circle cx="${markerX.toFixed(1)}" cy="${markerY.toFixed(1)}" r="5" fill="#fff" ` +
+        `stroke="#a33a3a" stroke-width="3"/>`;
+
+      const lengthUnit = activeUnit === "metric" ? "m" : "ft";
+      svgLabels.innerHTML =
+        `<text x="${left}" y="194">0 ${lengthUnit}</text>` +
+        `<text x="${(left + right) / 2}" y="194">${formatStat(displayLength(result.span / 2), lengthUnit, 3)}</text>` +
+        `<text x="${right}" y="194">${formatStat(displayLength(result.span), lengthUnit, 3)}</text>`;
+
+      const deflectionUnit = activeUnit === "metric" ? "mm" : "in";
+      const displayedMax = activeUnit === "metric"
+        ? Math.abs(checks.maxDeflection.value) * 25.4
+        : Math.abs(checks.maxDeflection.value);
+      const displayedAllow = activeUnit === "metric"
+        ? checks.deflectionAllowIn * 25.4
+        : checks.deflectionAllowIn;
+      svgScale.innerHTML =
+        `<text x="8" y="58">${formatStat(displayedAllow, deflectionUnit, 3)}</text>` +
+        `<text x="8" y="158">−${formatStat(displayedMax, deflectionUnit, 3)}</text>`;
+
+      document.getElementById("deflection-header").textContent =
+        `vmax = ${formatStat(displayedMax, deflectionUnit, 3)} at x = ` +
+        `${formatStat(displayLength(checks.maxDeflection.x), lengthUnit, 3)} · ` +
+        `L/360 = ${formatStat(displayedAllow, deflectionUnit, 3)}`;
+    }
+
     function updateStatics() {
       const result = calculateStatics();
+      const checks = calculateDeflectionAndChecks(result);
       const forceUnit = activeUnit === "metric" ? "kN" : "kip";
       const momentUnit = activeUnit === "metric" ? "kN-m" : "kip-ft";
       const lengthUnit = activeUnit === "metric" ? "m" : "ft";
+      const deflectionUnit = activeUnit === "metric" ? "mm" : "in";
+      const stressUnit = activeUnit === "metric" ? "MPa" : "ksi";
 
       summaryCards[0].querySelector(".value").textContent =
         formatStat(displayMoment(Math.abs(result.maxMoment.value)), momentUnit, 3);
@@ -1308,14 +1474,61 @@
         formatStat(displayForce(Math.abs(result.maxShear.value)), forceUnit, 3);
       summaryCards[1].querySelector(".detail").textContent =
         `at x = ${formatStat(displayLength(result.maxShear.x), lengthUnit, 3)}`;
+      const displayedDeflection = activeUnit === "metric"
+        ? Math.abs(checks.maxDeflection.value) * 25.4
+        : Math.abs(checks.maxDeflection.value);
+      summaryCards[2].querySelector(".value").textContent =
+        formatStat(displayedDeflection, deflectionUnit, 3);
+      summaryCards[2].querySelector(".detail").textContent =
+        `at x = ${formatStat(displayLength(checks.maxDeflection.x), lengthUnit, 3)}`;
 
       drawBeamStatics(result);
       drawShear(result);
       drawMoment(result);
+      drawDeflection(result, checks);
       document.querySelector(".plot-panel .panel-heading .example-badge").textContent =
-        "Calculated statics";
+        "Calculated analysis";
       document.querySelector(".footer-note").textContent =
-        "Reaction, shear, and moment values are calculated. Deflection and strength checks remain placeholders.";
+        "Reaction, shear, moment, deflection, and strength values are calculated.";
+
+      const bendingDisplay = activeUnit === "metric"
+        ? checks.bendingStressKsi * 6.894757
+        : checks.bendingStressKsi;
+      const bendingAllowDisplay = activeUnit === "metric"
+        ? checks.member.Fb * 6.894757
+        : checks.member.Fb;
+      const bendingStatus = checks.bendingPass ? "PASS" : "FAIL";
+      document.getElementById("bending-check-line").innerHTML =
+        `<strong>${bendingStatus}</strong> · ${formatStat(bendingDisplay, stressUnit, 3)} ≤ ` +
+        `${formatStat(bendingAllowDisplay, stressUnit, 3)}`;
+      document.getElementById("bending-property-line").textContent =
+        `${activeUnit === "metric" ? "Sₓ = " + formatStat(checks.member.S * 16387.064, "mm³", 3) : "Sₓ = " + formatStat(checks.member.S, "in³", 3)} · ` +
+        `Utilization = ${(checks.bendingUtilization * 100).toFixed(1)}%`;
+      const bendingBadge = document.getElementById("bending-check-badge");
+      bendingBadge.textContent = bendingStatus;
+      bendingBadge.style.color = checks.bendingPass ? "#18794e" : "#a33a3a";
+      bendingBadge.style.background = checks.bendingPass ? "#e7f6ef" : "#fdeaea";
+
+      const displayedAllow = activeUnit === "metric"
+        ? checks.deflectionAllowIn * 25.4
+        : checks.deflectionAllowIn;
+      const deflectionStatus = checks.deflectionPass ? "PASS" : "FAIL";
+      document.getElementById("deflection-check-line").innerHTML =
+        `<strong>${deflectionStatus}</strong> · ${formatStat(displayedDeflection, deflectionUnit, 3)} ≤ ` +
+        `${formatStat(displayedAllow, deflectionUnit, 3)}`;
+      document.getElementById("deflection-utilization-line").textContent =
+        `Utilization = ${(checks.deflectionUtilization * 100).toFixed(1)}%`;
+      const deflectionBadge = document.getElementById("deflection-check-badge");
+      deflectionBadge.textContent = deflectionStatus;
+      deflectionBadge.style.color = checks.deflectionPass ? "#18794e" : "#a33a3a";
+      deflectionBadge.style.background = checks.deflectionPass ? "#e7f6ef" : "#fdeaea";
+
+      const overallPass = checks.bendingPass && checks.deflectionPass;
+      summaryCards[3].classList.toggle("status-pass", overallPass);
+      summaryCards[3].classList.toggle("status-fail", !overallPass);
+      summaryCards[3].querySelector(".value").textContent = overallPass ? "PASS" : "FAIL";
+      summaryCards[3].querySelector(".detail").textContent =
+        overallPass ? "Both checks pass" : "One or more checks fail";
     }
 
     function validateInputs() {
