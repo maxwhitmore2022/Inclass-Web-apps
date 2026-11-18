@@ -21,3 +21,4 @@
 - 2026-11-18: Implemented Stage 5 polish in `index.html`: skip navigation, live status announcements, text-and-icon PASS/FAIL indicators, print/export controls, print styling, and keyboard-focused polish. Added a Stage 5 validation matrix under `02_validation/`. Completed successfully.
 - 2026-11-18: Added the original floating martial-arts panda mascot requirements to the Look and feel section of `spec.md`. Completed successfully.
 - 2026-11-18: Added an original animated martial-arts panda mascot that floats over the page in `index.html`; it is decorative, not the copyrighted Po character. Completed successfully.
+- 2026-11-18: Replaced the panda mascot with a cartoon panda face in `index.html`; clicking outside controls moves it to the click location and pressing `P` toggles its hair. Updated the matching requirements in `spec.md`. Completed successfully.

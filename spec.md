@@ -324,11 +324,14 @@ whether the beam is strong and stiff enough.
   mobile widths.
 - Keep labels, axes, units, support symbols, load arrows, and PASS/FAIL
   statuses legible at all supported widths.
-- Include an original martial-arts panda mascot as a small, decorative
-  fixed element. It should float and gently rotate continuously without
-  blocking controls or covering meaningful page content.
-- Use a smaller mascot size on narrow screens and disable floating
-  animation when the user has enabled reduced-motion preferences.
+- Include an original cartoon panda face as a small, decorative fixed
+  element that remains separate from controls and meaningful page content.
+- Clicking an area outside a control moves the panda face smoothly to the
+  click location, keeping it inside the viewport.
+- Pressing the letter `P` outside a text or selection control toggles a
+  stylized hair shape above the panda face.
+- Use a smaller mascot size on narrow screens and disable movement
+  transitions when the user has enabled reduced-motion preferences.
 
 ### Initial state
 - Open with the default simply supported 20 ft beam loaded by the
