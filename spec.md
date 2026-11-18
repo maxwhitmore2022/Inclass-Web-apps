@@ -324,6 +324,11 @@ whether the beam is strong and stiff enough.
   mobile widths.
 - Keep labels, axes, units, support symbols, load arrows, and PASS/FAIL
   statuses legible at all supported widths.
+- Include an original martial-arts panda mascot as a small, decorative
+  fixed element. It should float and gently rotate continuously without
+  blocking controls or covering meaningful page content.
+- Use a smaller mascot size on narrow screens and disable floating
+  animation when the user has enabled reduced-motion preferences.
 
 ### Initial state
 - Open with the default simply supported 20 ft beam loaded by the

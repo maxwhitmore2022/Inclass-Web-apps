@@ -16,3 +16,6 @@
 - 2026-11-18: Normalized the beam reaction diagram arrows in `index.html` using one shared SVG arrowhead and even spacing. Completed successfully.
 - 2026-11-18: Replaced the beam/load/reaction arrows with exactly 10 small, evenly spaced vertical downward arrows. Completed successfully.
 - 2026-11-18: Moved the mockup into Stage 2 by adding repeatable loads, unit conversion, reset behavior, support/member interactions, and inline input validation. No calculations were added. Completed successfully.
+- 2026-11-18: Implemented Stage 3 statics in `index.html`: reactions, shear, moment, dynamic beam/load labels, shear/moment plots, unit-aware results, and recalculation on valid input changes. Deflection and member-strength checks remain unimplemented. Completed successfully.
+- 2026-11-18: Added the original floating martial-arts panda mascot requirements to the Look and feel section of `spec.md`. Completed successfully.
+- 2026-11-18: Added an original animated martial-arts panda mascot that floats over the page in `index.html`; it is decorative, not the copyrighted Po character. Completed successfully.
